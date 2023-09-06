@@ -168,8 +168,6 @@ else
     echo "jq version: $JQ_VERSION"
 fi
 
-# Write versions to a JSON file
-echo "{\"node\": \"$NODE_VERSION\", \"npm\": \"$NPM_VERSION\", \"git\": \"$GIT_VERSION\", \"jq\": \"$JQ_VERSION\"}" > config.json
 
 
 # Create or modify the JSON
@@ -184,11 +182,46 @@ if [ "$1" == "list" ]; then
     cat $JSON_FILE
     exit 0
 fi
+# Function to check if a directory is empty
+is_directory_empty() {
+    shopt -s nullglob dotglob
+    files=(web-app/*)
+    if (( ${#files[@]} == 0 )); then
+        return 0 # Empty
+    else
+        return 1 # Not empty
+    fi
+}
+
+# Check if the user typed "init"
+if [ "$1" == "init" ]; then
+    # Check if the 'web-app' folder is empty
+    if is_directory_empty; then
+        # If it's empty, delete the folder
+        rm -rf web-app
+        # Using npx to set up Svelte
+        git clone git@github.com:mainblocs/sveltekit-template.git web-app
+        rm -rf web-app/.git
+        cd web-app
+
+        # Install dependencies
+        npm install
+        # Write versions to a JSON file
+        echo "{\"node\": \"$NODE_VERSION\", \"npm\": \"$NPM_VERSION\", \"git\": \"$GIT_VERSION\", \"jq\": \"$JQ_VERSION\", \"initiated\": \"true\"}" > config.json
+
+        # Run the application
+        npm run dev
+    else
+        # If it's not empty, provide a message
+        echo -e "web-app folder is not empty. Please delete it before running the script. Exiting..."
+        exit 1
+    fi
+else
+    cd web-app
+    # Install dependencies
+    npm install
+    # Run the application
+    npm run dev
+fi
 
 
-# Using npx to set up Svelte
-npx create-svelte@next web-app
-
-cd web-app
-npm install
-npm run dev
