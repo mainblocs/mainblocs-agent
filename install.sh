@@ -1,6 +1,7 @@
 #!/bin/bash
 # For Linux
 # Create or modify the JSON
+# curl -sSSL https://raw.githubusercontent.com/mainblocs/mainblocs-agent/main/install.sh | bash -s init
 JSON_FILE="./config.json"
 INITIATED=$(jq -r '.initiated' "$JSON_FILE")
 echo "INITIATED: $INITIATED"
