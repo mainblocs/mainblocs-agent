@@ -1,5 +1,13 @@
 #!/bin/bash
 # For Linux
+# Create or modify the JSON
+JSON_FILE="./config.json"
+
+if [ ! -f "$JSON_FILE" ]; then
+    # If config.json doesn't exist, create it with "initiated" set to "false"
+    echo '{"initiated": "false"}' > "$JSON_FILE"
+fi
+
 install_package_manager_on_linux() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -183,32 +191,33 @@ if [ "$1" == "list" ]; then
     exit 0
 fi
 # Function to check if a directory is empty
-is_directory_empty() {
-    shopt -s nullglob dotglob
-    files=(web-app/*)
-    if (( ${#files[@]} == 0 )); then
-        return 0 # Empty
+# Function to check if a directory is empty or doesn't exist
+is_directory_empty_or_not_existing() {
+    if [ ! -d "web-app" ] || [ -z "$(ls -A web-app 2>/dev/null)" ]; then
+        return 0 # Empty or not existing
     else
-        return 1 # Not empty
+        return 1 # Not empty and exists
     fi
 }
+INITIATED=$(jq -r '.initiated' "$JSON_FILE")
 
 # Check if the user typed "init"
-if [ "$1" == "init" ]; then
+if [ "$1" == "init" ] || ! "$INITIATED";  then
     # Check if the 'web-app' folder is empty
-    if is_directory_empty; then
+    if is_directory_empty_or_not_existing; then
         # If it's empty, delete the folder
         rm -rf web-app
         # Using npx to set up Svelte
         git clone git@github.com:mainblocs/sveltekit-template.git web-app
         rm -rf web-app/.git
+           # Write versions to a JSON file
+        echo "{\"node\": \"$NODE_VERSION\", \"npm\": \"$NPM_VERSION\", \"git\": \"$GIT_VERSION\", \"jq\": \"$JQ_VERSION\", \"initiated\": \"true\"}" > config.json
+
         cd web-app
 
         # Install dependencies
         npm install
-        # Write versions to a JSON file
-        echo "{\"node\": \"$NODE_VERSION\", \"npm\": \"$NPM_VERSION\", \"git\": \"$GIT_VERSION\", \"jq\": \"$JQ_VERSION\", \"initiated\": \"true\"}" > config.json
-
+     
         # Run the application
         npm run dev
     else
