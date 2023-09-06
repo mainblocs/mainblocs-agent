@@ -1,3 +1,7 @@
-if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
-    iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-}
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1','chocolatey-install.ps1'))
+
+# Run the Chocolatey installation script
+powershell.exe -ExecutionPolicy Bypass -File .\chocolatey-install.ps1
+
+# Verify the installation (optional)
+choco --version

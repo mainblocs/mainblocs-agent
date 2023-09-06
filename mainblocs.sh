@@ -1,13 +1,26 @@
 #!/bin/bash
 
-# Check for jq (JSON parser)
-command -v jq >/dev/null 2>&1 || {
-    echo "Please install 'jq' - a command-line JSON parser."
-    exit 1
-}
-
-# Create directory and download the installation script
-curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/install.sh -o install.sh
+case "$(uname -s)" in
+   Darwin) 
+       # MacOS
+       curl -sSL https://raw.githubusercontent.com/mainblocs/mainblocs-agent/main/install.sh -o install.sh
+       bash ./install.sh
+       ;;
+   Linux) 
+       # Linux
+       curl -sSL https://raw.githubusercontent.com/mainblocs/mainblocs-agent/main/install.sh -o install.sh
+       bash ./install.sh
+       ;;
+   CYGWIN*|MINGW32*|MSYS*|MINGW*) 
+       # Windows
+       curl -sSL https://raw.githubusercontent.com/mainblocs/mainblocs-agent/main/install.ps1 -o install.ps1
+       ;;
+       powershell.exe -ExecutionPolicy Bypass -File .\install.ps1
+   *) 
+       # Unknown OS
+       echo "Unknown operating system"
+       ;;
+esac
 
 # Create or modify the JSON
 JSON_FILE="./config.json"
