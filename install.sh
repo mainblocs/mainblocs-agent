@@ -2,7 +2,12 @@
 # For Linux
 # Create or modify the JSON
 JSON_FILE="./config.json"
-
+INITIATED=$(jq -r '.initiated' "$JSON_FILE")
+echo "INITIATED: $INITIATED"
+if "$INITIATED" && [ "$1" != "reset" ]; then
+    echo "project already initiated, run 'cd web-app && npm run dev' to start the project or run 'bash install.sh reset' to re-initiate the project."
+    exit 0
+fi
 if [ ! -f "$JSON_FILE" ]; then
     # If config.json doesn't exist, create it with "initiated" set to "false"
     echo '{"initiated": "false"}' > "$JSON_FILE"
@@ -199,7 +204,7 @@ is_directory_empty_or_not_existing() {
         return 1 # Not empty and exists
     fi
 }
-INITIATED=$(jq -r '.initiated' "$JSON_FILE")
+
 
 # Check if the user typed "init"
 if [ "$1" == "init" ] || ! "$INITIATED";  then
@@ -233,4 +238,11 @@ else
     npm run dev
 fi
 
+if [ "$1" == "reset" ];
+then
+    rm -rf web-app
+    rm -rf config.json
+    echo "Project reset successfully."
+    ./install.sh init
+fi
 
