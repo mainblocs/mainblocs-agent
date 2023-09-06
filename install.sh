@@ -170,3 +170,25 @@ fi
 
 # Write versions to a JSON file
 echo "{\"node\": \"$NODE_VERSION\", \"npm\": \"$NPM_VERSION\", \"git\": \"$GIT_VERSION\", \"jq\": \"$JQ_VERSION\"}" > config.json
+
+
+# Create or modify the JSON
+JSON_FILE="./config.json"
+[ ! -f $JSON_FILE ] && echo '{}' > $JSON_FILE
+
+# Add data to JSON
+jq '.web_url = "YOUR_WEB_URL"' $JSON_FILE > tmp.$$.json && mv tmp.$$.json $JSON_FILE
+# Add more key-values as required
+
+if [ "$1" == "list" ]; then
+    cat $JSON_FILE
+    exit 0
+fi
+
+
+# Using npx to set up Svelte
+npx create-svelte@next web-app
+
+cd web-app
+npm install
+npm run dev
